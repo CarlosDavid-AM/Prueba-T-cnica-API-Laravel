@@ -1,58 +1,236 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Gestión de Productos y Categorías (REST API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema backend diseñado como una API REST desacoplada y centralizada para la gestión completa (CRUD) de productos y categorías. Expone interfaces limpias y estandarizadas preparadas para ser consumidas por múltiples clientes (aplicaciones web, móviles o integraciones con partners externos).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Requisitos Previos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Antes de instalar y ejecutar la aplicación, asegúrese de contar con las siguientes herramientas instaladas en su entorno:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **PHP**: Versión `>= 8.3` (con extensiones habilitadas: `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl`, `curl`, `tokenizer`, `xml`, `ctype`).
+- **Composer**: Versión `>= 2.x`.
+- **SQLite**: Motor de base de datos local embebido.
+- **Node.js y NPM** (Opcional, en caso de compilar assets front-end).
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 2. Comandos para Levantar el Entorno
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Siga estos pasos para clonar, configurar e iniciar el proyecto:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Paso 1: Clonar el repositorio y entrar al directorio
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/CarlosDavid-AM/Prueba-T-cnica-API-Laravel.git
+cd Prueba-T-cnica-API-Laravel
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Paso 2: Instalar las dependencias de Composer
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Paso 3: Configurar el archivo de entorno `.env`
 
-## Code of Conduct
+Copie el archivo de ejemplo y genere la clave de aplicación:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+# En Windows (PowerShell / CMD)
+copy .env.example .env
 
-## Security Vulnerabilities
+# En Linux / macOS
+cp .env.example .env
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Generar la APP_KEY
+php artisan key:generate
+```
 
-## License
+Verifique que en su `.env` la conexión de base de datos apunte a SQLite:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+DB_CONNECTION=sqlite
+```
+
+### Paso 4: Crear la base de datos SQLite y ejecutar migraciones con Seeders
+
+```bash
+# Crear el archivo de base de datos SQLite si no existe
+# En Windows (PowerShell):
+if (!(Test-Path database/database.sqlite)) { New-Item -ItemType File database/database.sqlite }
+
+# En Linux / macOS:
+touch database/database.sqlite
+
+# Ejecutar migraciones junto a los Seeders (carga 20 registros fake)
+php artisan migrate --seed
+```
+
+### Paso 5: Generar la documentación interactiva Swagger
+
+```bash
+php artisan l5-swagger:generate
+```
+
+### Paso 6: Iniciar el servidor local de desarrollo
+
+```bash
+php artisan serve
+```
+
+El servidor estará escuchando por defecto en: `http://127.0.0.1:8000`.
+
+---
+
+## 3. URLs Base y Endpoints
+
+- **URL Base del Servidor**: `http://127.0.0.1:8000`
+- **Prefijo de la API REST**: `http://127.0.0.1:8000/api`
+- **Documentación Interactiva (Swagger UI)**: `http://127.0.0.1:8000/api/documentation`
+
+### Resumen de Endpoints Disponibles
+
+#### Categorías
+
+| Método   | Endpoint               | Acción    | Descripción                                  |
+| -------- | ---------------------- | --------- | -------------------------------------------- |
+| `GET`    | `/api/categories`      | `index`   | Listar todas las categorías (sin paginación) |
+| `POST`   | `/api/categories`      | `store`   | Crear una nueva categoría                    |
+| `GET`    | `/api/categories/{id}` | `show`    | Consultar el detalle de una categoría por ID |
+| `PUT`    | `/api/categories/{id}` | `update`  | Actualizar una categoría existente           |
+| `DELETE` | `/api/categories/{id}` | `destroy` | Eliminar una categoría (valida dependencias) |
+
+#### Productos
+
+| Método   | Endpoint             | Acción    | Descripción                                          |
+| -------- | -------------------- | --------- | ---------------------------------------------------- |
+| `GET`    | `/api/products`      | `index`   | Listar todos los productos con su categoría asociada |
+| `POST`   | `/api/products`      | `store`   | Crear un nuevo producto                              |
+| `GET`    | `/api/products/{id}` | `show`    | Consultar el detalle de un producto por ID           |
+| `PUT`    | `/api/products/{id}` | `update`  | Actualizar un producto existente                     |
+| `DELETE` | `/api/products/{id}` | `destroy` | Eliminar un producto por ID                          |
+
+---
+
+## 4. Estructura del Proyecto
+
+El sistema adopta una arquitectura desacoplada donde la lógica de negocio se aísla de los controladores HTTP:
+
+```text
+app/
+├── Exceptions/
+│   └── BusinessLogicException.php    # Excepciones de negocio personalizadas con render JSON nativo
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   │       ├── CategoryController.php # Controlador API delgado para Categorías (anotaciones OpenAPI)
+│   │       ├── ProductController.php  # Controlador API delgado para Productos (anotaciones OpenAPI)
+│   │       └── SwaggerController.php  # Metadatos globales y esquemas Swagger/OpenAPI
+│   ├── Requests/
+│   │   ├── BaseApiRequest.php         # Request base con respuesta JSON estandarizada para fallas de validación
+│   │   ├── Category/
+│   │   │   ├── StoreCategoryRequest.php
+│   │   │   └── UpdateCategoryRequest.php
+│   │   └── Product/
+│   │       ├── StoreProductRequest.php
+│   │       └── UpdateProductRequest.php
+│   ├── Resources/
+│   │   ├── CategoryResource.php       # Transformador y serializador de datos para Categorías
+│   │   └── ProductResource.php        # Transformador y serializador de datos para Productos
+│   └── Responses/
+│       └── ApiResponse.php            # Helper centralizado para construir respuestas JSON consistentes
+├── Models/
+│   ├── Category.php                   # Modelo Eloquent con relación hasMany(Product::class)
+│   └── Product.php                    # Modelo Eloquent con relación belongsTo(Category::class)
+└── Services/
+    ├── CategoryService.php            # Reglas de negocio y operaciones de persistencia de Categorías
+    └── ProductService.php             # Reglas de negocio y operaciones de persistencia de Productos
+database/
+├── factories/
+│   ├── CategoryFactory.php            # Fábrica de datos fake para Categorías
+│   └── ProductFactory.php             # Fábrica de datos fake para Productos
+├── migrations/
+│   ├── 2026_11_16_164233_create_categories_table.php
+│   └── 2026_11_16_164234_create_products_table.php
+└── seeders/
+    ├── CategorySeeder.php             # Seeder que genera 20 categorías fake
+    ├── ProductSeeder.php              # Seeder que genera 20 productos fake asociados a categorías
+    └── DatabaseSeeder.php             # Orquestador de seeders
+```
+
+---
+
+## 5. Manejo de Errores y Respuestas Estándar
+
+Todas las respuestas del API siguen una estructura JSON homogénea y predecible.
+
+### 5.1. Respuesta Exitosa (`HTTP 200 / 201`)
+
+Contiene siempre `success: true`, un `message` descriptivo y la carga útil en `data` (objeto o lista).
+
+```json
+{
+    "success": true,
+    "message": "Producto creado correctamente",
+    "data": {
+        "id": 1,
+        "name": "Camiseta Overskull",
+        "description": "Camiseta negra edición limitada",
+        "price": 89.9,
+        "stock": 50,
+        "category_id": 1,
+        "created_at": "2026-11-16T16:56:30.000000Z",
+        "updated_at": "2026-11-16T16:56:30.000000Z"
+    }
+}
+```
+
+### 5.2. Error de Validación de Datos (`HTTP 422`)
+
+Se produce cuando los datos enviados no cumplen las reglas de los Form Requests:
+
+```json
+{
+    "success": false,
+    "message": "El campo 'name' es obligatorio",
+    "errors": {
+        "name": ["El campo 'name' es obligatorio"]
+    }
+}
+```
+
+### 5.3. Recurso No Encontrado (`HTTP 404`)
+
+Se produce al consultar, actualizar o eliminar un recurso inexistente:
+
+```json
+{
+    "success": false,
+    "message": "Producto con ID 999 no encontrado"
+}
+```
+
+### 5.4. Excepción de Regla de Negocio (`HTTP 409 / 422`)
+
+Se dispara ante violaciones a la lógica de negocio (por ejemplo, intentar eliminar una categoría que posee productos activos):
+
+```json
+{
+    "success": false,
+    "message": "No se puede eliminar la categoría porque tiene productos asociados"
+}
+```
+
+---
+
+## 6. Comandos Útiles
+
+| Tarea                              | Comando                             |
+| ---------------------------------- | ----------------------------------- |
+| Iniciar servidor local             | `php artisan serve`                 |
+| Listar todas las rutas del API     | `php artisan route:list --path=api` |
+| Regenerar documentación Swagger    | `php artisan l5-swagger:generate`   |
+| Reiniciar y repoblar base de datos | `php artisan migrate:fresh --seed`  |
+| Formatear código con Laravel Pint  | `vendor/bin/pint`                   |
+| Consola interactiva Tinker         | `php artisan tinker`                |
